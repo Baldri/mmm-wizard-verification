@@ -1,0 +1,45 @@
+name: Lean 4 Verification
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# No untrusted user input is used in any `run:` step below.
+# Workflow operates only on repository contents at the checked-out commit.
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: lake build (machine-check all theorems)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install elan + Lean toolchain
+        uses: leanprover/lean-action@v1
+        with:
+          use-mathlib-cache: false
+          test: false
+          lint: false
+
+      - name: Build (lake build) - verifies every theorem
+        run: lake build
+
+      - name: Re-check Examples.lean via lake env lean
+        run: lake env lean MmmVerification/Examples.lean
+
+      - name: Print axiom dependencies (audit trail)
+        run: lake env lean scripts/print_axioms.lean
+
+      - name: Guard against sorry placeholders
+        run: |
+          set -e
+          if grep -rn --include='*.lean' -w 'sorry' MmmVerification/ MmmVerification.lean; then
+            echo "::error::Found 'sorry' placeholder - every proof must be complete."
+            exit 1
+          fi
+          echo "OK - no 'sorry' found."
