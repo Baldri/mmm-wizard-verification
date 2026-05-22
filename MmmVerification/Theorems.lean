@@ -39,4 +39,72 @@ theorem preservesTotal_after_nonneg (r : Recommendation)
     (_h : r.preservesTotal) : 0 ≤ r.after.total :=
   r.after.total_nonneg
 
+-- ─── Sprint-6 Layer-2 Extensions (Theorems 4-8) ──────────────────────
+-- Sprint-5 PoC etablierte 3 Theorems (Identity, Iff-Lemma, After-Nonneg).
+-- Sprint-6 erweitert um 5 weitere Properties — alle ohne Mathlib-Dependency,
+-- direkt aus Lean 4 core, in <3s `lake build` verifizierbar.
+--
+-- Pattern aus nexbid `protocol-commerce` (47 auction-theorems) übertragen:
+-- Reflexivitaet/Symmetrie/Transitivitaet von Invarianten als Standard-
+-- Building-Blocks fuer Audit-Trail-Chains.
+
+/-- **Theorem 4 (per_channel_amount_nonneg):**
+    Every channel amount in any allocation is non-negative.
+
+    Trivial consequence of the `nonneg` field, but useful as a building
+    block for proofs about specific channels. Downstream code can rely on
+    `a.amount c ≥ 0` for any channel without re-deriving from the structure. -/
+theorem per_channel_amount_nonneg (a : Allocation) (c : Channel) :
+    0 ≤ a.amount c :=
+  a.nonneg c
+
+/-- **Theorem 5 (preservesTotal_refl):**
+    Every allocation is a valid "self-recommendation" (do-nothing case).
+
+    Property: ∀ a, ⟨a, a⟩.preservesTotal. Establishes that the identity
+    recommendation is always valid — the trivial baseline that any
+    optimisation algorithm must dominate. -/
+theorem preservesTotal_refl (a : Allocation) :
+    ({ before := a, after := a } : Recommendation).preservesTotal := by
+  unfold Recommendation.preservesTotal
+  rfl
+
+/-- **Theorem 6 (preservesTotal_symm):**
+    `preservesTotal` is symmetric: if a → b preserves total, so does b → a.
+
+    Audit-trail interpretation: a recommendation is "reversible" with respect
+    to total-budget invariance. If we can prove the recommendation valid,
+    we can also prove the inverse (un-do) valid. -/
+theorem preservesTotal_symm (r : Recommendation) (h : r.preservesTotal) :
+    ({ before := r.after, after := r.before } : Recommendation).preservesTotal := by
+  unfold Recommendation.preservesTotal at h ⊢
+  exact h.symm
+
+/-- **Theorem 7 (preservesTotal_trans):**
+    `preservesTotal` is transitive: if a → b and b → c both preserve total,
+    then a → c preserves total.
+
+    Audit-trail interpretation: chained recommendations compose. A pilot
+    customer running multiple optimisation rounds gets cumulative validity —
+    each step's audit-trail extends consistently. -/
+theorem preservesTotal_trans
+    (r1 : Recommendation) (h1 : r1.preservesTotal)
+    (r2 : Recommendation) (h2 : r2.preservesTotal)
+    (hbridge : r1.after = r2.before) :
+    ({ before := r1.before, after := r2.after } : Recommendation).preservesTotal := by
+  unfold Recommendation.preservesTotal at h1 h2 ⊢
+  rw [h1, hbridge, h2]
+
+/-- **Theorem 8 (preservesTotal_implies_both_nonneg):**
+    Strengthens `preservesTotal_after_nonneg`: in a valid recommendation
+    BOTH endpoints have non-negative total. Trivially true by structure,
+    but explicit as a single-step lemma for downstream proofs that need
+    to bound both sides without unfolding.
+
+    Returned as a conjunction to match the auditability API shape (one
+    proof object covers both bounds). -/
+theorem preservesTotal_implies_both_nonneg (r : Recommendation)
+    (_h : r.preservesTotal) : 0 ≤ r.before.total ∧ 0 ≤ r.after.total :=
+  ⟨r.before.total_nonneg, r.after.total_nonneg⟩
+
 end MmmVerification
