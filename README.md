@@ -125,23 +125,36 @@ the same pattern.
 
 Total: **10 theorems**, 0 `sorry` placeholders, all kernel-verified.
 
-## Sprint-6+ Roadmap
+## Sprint-6 Stream-L: DONE (2026-05-22)
 
-ADR-003 lists 6-8 core theorems for a production-grade verification layer:
+Sprint-6 Stream-L expanded the theorem suite from 5 to 10, adding the four
+algebraic invariants that downstream audit-trail proofs typically need
+(reflexivity / symmetry / transitivity + per-channel-bound). All theorems
+are machine-checked in `lake build` with no Mathlib dependency.
 
-- **ROI-Ordering-Respect** - for two non-saturated channels, higher posterior ROI
-  must imply >= recommended budget.
-- **Non-Negative-Recommendation** - every individual channel recommendation
-  is >= 0 (today guaranteed by the `Allocation.nonneg` field; Sprint-6 lifts
-  it to the recommendation level).
-- **Determinism** - same input + same seed implies same output (audit
-  reproducibility — pairs with the Layer-1 audit hash).
-- **Saturation-Respect** - if a channel is at its saturation point in the
-  posterior, additional budget on that channel must be 0.
-- **Pareto-Optimality** - no other allocation with the same total has strictly
-  higher posterior expected outcome.
-- **Cents-Integer-Migration** - move from `Rat` to `Nat` (cents) for
-  bit-exact financial reproducibility.
+## Sprint-7+ Roadmap
+
+ADR-003 listed 6-8 core theorems for a production-grade verification layer.
+Of those, **the algebraic-invariant family (theorems 4-8 above) is complete**.
+The remaining production-grade theorems require additional definitions
+(ROI, saturation curve, posterior — currently un-modelled):
+
+- **ROI-Ordering-Respect** — for two non-saturated channels, higher posterior
+  ROI must imply >= recommended budget. *Needs ROI type definition.*
+- **Determinism** — same input + same seed implies same output (audit
+  reproducibility — pairs with the Layer-1 audit hash). *Needs Meridian
+  Bayesian-sampler model.*
+- **Saturation-Respect** — if a channel is at its saturation point in the
+  posterior, additional budget on that channel must be 0. *Needs saturation
+  curve type.*
+- **Pareto-Optimality** — no other allocation with the same total has strictly
+  higher posterior expected outcome. *Needs full optimisation model.*
+- **Cents-Integer-Migration** — move from `Rat` to `Nat` (cents) for
+  bit-exact financial reproducibility. *Refactor, not new property.*
+
+Estimate: ROI-Ordering + Determinism are ~Sprint-7 work (2-3 weeks each
+including type-modelling); Saturation-Respect + Pareto-Optimality are
+~Sprint-8+ (require Bayesian-sampler model).
 
 ## Foundation Decisions
 
@@ -162,7 +175,7 @@ mmm-wizard-verification/
 |-- MmmVerification.lean       # Library entry point (re-exports modules)
 |-- MmmVerification/
 |   |-- Allocation.lean        # Channel, Allocation, Recommendation types
-|   |-- Theorems.lean          # Core theorems (identity, iff, nonneg)
+|   |-- Theorems.lean          # 8 theorems (identity, iff, nonneg + algebraic invariants 4-8)
 |   `-- Examples.lean          # Concrete CHF 320,000 demo + theorem
 |-- scripts/
 |   `-- print_axioms.lean      # Audit-trail: shows what axioms each theorem trusts
