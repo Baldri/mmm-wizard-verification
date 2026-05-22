@@ -117,8 +117,13 @@ the same pattern.
 | 3 | `preservesTotal_after_nonneg` | `MmmVerification/Theorems.lean` | Any valid recommendation yields non-negative total budget. |
 | 4 | `Allocation.total_nonneg` | `MmmVerification/Allocation.lean` | Sum of non-negative channel budgets is non-negative. |
 | 5 | `example_shift_preserves_total` | `MmmVerification/Examples.lean` | The concrete CHF 1,000 display -> ai_assistant shift preserves total. |
+| 6 | `per_channel_amount_nonneg` | `MmmVerification/Theorems.lean` | Every channel amount in any allocation is non-negative. |
+| 7 | `preservesTotal_refl` | `MmmVerification/Theorems.lean` | Every allocation is a valid self-recommendation (do-nothing baseline). |
+| 8 | `preservesTotal_symm` | `MmmVerification/Theorems.lean` | `preservesTotal` is symmetric: a → b valid implies b → a valid (reversibility). |
+| 9 | `preservesTotal_trans` | `MmmVerification/Theorems.lean` | `preservesTotal` composes: chained recommendations preserve total if endpoints match. |
+| 10 | `preservesTotal_implies_both_nonneg` | `MmmVerification/Theorems.lean` | Valid recommendation has non-negative total on BOTH endpoints. |
 
-Total: **5 theorems**, 0 `sorry` placeholders, all kernel-verified.
+Total: **10 theorems**, 0 `sorry` placeholders, all kernel-verified.
 
 ## Sprint-6+ Roadmap
 
