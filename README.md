@@ -122,8 +122,10 @@ the same pattern.
 | 8 | `preservesTotal_symm` | `MmmVerification/Theorems.lean` | `preservesTotal` is symmetric: a → b valid implies b → a valid (reversibility). |
 | 9 | `preservesTotal_trans` | `MmmVerification/Theorems.lean` | `preservesTotal` composes: chained recommendations preserve total if endpoints match. |
 | 10 | `preservesTotal_implies_both_nonneg` | `MmmVerification/Theorems.lean` | Valid recommendation has non-negative total on BOTH endpoints. |
+| 11 | `Allocation.total_eq_of_pointwise_eq` | `MmmVerification/Allocation.lean` | Pointwise-equal channel amounts ⇒ equal totals (extensionality). |
+| 12 | `preservesTotal_of_pointwise_eq` | `MmmVerification/Theorems.lean` | Recommendation with pointwise-equal endpoints preserves total. |
 
-Total: **10 theorems**, 0 `sorry` placeholders, all kernel-verified.
+Total: **12 theorems**, 0 `sorry` placeholders, all kernel-verified.
 
 ## Sprint-6 Stream-L: DONE (2026-05-22)
 
@@ -131,6 +133,25 @@ Sprint-6 Stream-L expanded the theorem suite from 5 to 10, adding the four
 algebraic invariants that downstream audit-trail proofs typically need
 (reflexivity / symmetry / transitivity + per-channel-bound). All theorems
 are machine-checked in `lake build` with no Mathlib dependency.
+
+## Sprint-7-Bridge: T11-T12 (2026-05-23)
+
+Two extensionality lemmas that bridge the Sprint-6 algebra to the Sprint-7
+ROI/saturation theorems planned in the roadmap below:
+
+- **T11 (`total_eq_of_pointwise_eq`)** — the per-channel `amount` function
+  determines `total`. Closes the gap between "two recommendations agree on
+  every channel" and "two recommendations preserve the same total."
+- **T12 (`preservesTotal_of_pointwise_eq`)** — corollary specialised to
+  `Recommendation`. Lets Sprint-7 algorithms certify do-nothing-restated
+  outputs without re-unfolding the six-fold sum.
+
+A third planned theorem (`amount_le_total` — per-channel bound by total)
+was deferred: a clean proof requires `Rat.le_add_of_nonneg_right` or
+similar order lemmas that live in Mathlib, not Lean core. Adding Mathlib
+would cost a ~15-minute cold build and ~3 GB cache against ~30 seconds
+today. We will revisit when Sprint-7 needs Mathlib anyway (the ROI-type
+work likely requires it).
 
 ## Sprint-7+ Roadmap
 

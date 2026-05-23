@@ -107,4 +107,28 @@ theorem preservesTotal_implies_both_nonneg (r : Recommendation)
     (_h : r.preservesTotal) : 0 ≤ r.before.total ∧ 0 ≤ r.after.total :=
   ⟨r.before.total_nonneg, r.after.total_nonneg⟩
 
+-- ─── Sprint-7-Bridge Extensions (Theorems 11-13) ─────────────────────
+-- Algebraische Building-Blocks ohne neue Type-Definitionen. T11 lebt in
+-- `Allocation.lean` (Extensionality der Totals); T13 ebenfalls
+-- (per-Channel-Bound durch Total). T12 hier weil Recommendation-bezogen.
+--
+-- Zusammen mit Theorems 1-10 ergibt das ein abgeschlossenes
+-- Extensionality+Bound-Toolkit, das Sprint-7-ROI-Theorems als
+-- voraussetzbare Lemmata nutzen koennen, sobald der ROI-Type modelliert
+-- ist (siehe README "Sprint-7+ Roadmap").
+
+/-- **Theorem 12 (preservesTotal_of_pointwise_eq):**
+    If a recommendation has pointwise-equal channel amounts on both sides,
+    it preserves total. Corollary of `Allocation.total_eq_of_pointwise_eq`.
+
+    Downstream usage: when an optimisation algorithm produces a "trivial"
+    do-nothing recommendation but with a structurally different `after`
+    value (e.g. re-keyed channel-map), this lemma certifies validity
+    without re-deriving the sum equality. -/
+theorem preservesTotal_of_pointwise_eq (r : Recommendation)
+    (h : ∀ c, r.before.amount c = r.after.amount c) :
+    r.preservesTotal := by
+  unfold Recommendation.preservesTotal
+  exact Allocation.total_eq_of_pointwise_eq r.before r.after h
+
 end MmmVerification
