@@ -56,6 +56,19 @@ theorem total_nonneg (a : Allocation) : 0 ≤ a.total := by
       (a.nonneg .video))
     (a.nonneg .aiAssistant)
 
+/-- **Theorem 11 (total_eq_of_pointwise_eq):**
+    Two allocations with pointwise-equal per-channel amounts have equal totals.
+
+    Extensionality lemma — the per-channel `amount` function determines
+    `total`. Useful when an audit-trail step proves channel-by-channel
+    equality between two recommendation paths and wants to conclude
+    total-equality without re-unfolding the six-fold sum. -/
+theorem total_eq_of_pointwise_eq (a b : Allocation)
+    (h : ∀ c, a.amount c = b.amount c) :
+    a.total = b.total := by
+  unfold total
+  rw [h .search, h .social, h .display, h .affiliate, h .video, h .aiAssistant]
+
 end Allocation
 
 /-- A recommendation transforms one allocation into another. -/
